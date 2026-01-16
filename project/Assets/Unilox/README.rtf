@@ -1,0 +1,65 @@
+{\rtf1\ansi\ansicpg1252\deff0\nouicompat\deflang1033{\fonttbl{\f0\fnil\fcharset0 Calibri;}{\f1\fnil\fcharset0 Consolas;}}
+{\*\generator Riched20 10.0.19041}\viewkind4\uc1
+\pard\sa200\sl276\slmult1\b\f0\fs32 Unilox\par
+\b0\fs22\par
+Unilox is a high-performance pseudorandom number generator (PRNG) library based on Philox32. It is optimized for games, simulations, and embedded applications, providing zero-copy Span APIs with automatic buffer management.\par
+\par
+It consists of a Rust-native backend wrapped for C# with cross-platform support (x64/aarch64).\par
+\par
+\b Features\b0\par
+\par
+- Philox32 Algorithm: High-quality, counter-based PRNG.\par
+- High Performance: Zero-copy Span APIs for maximum efficiency.\par
+- Automatic Buffer Management: Defaults to 4KB buffer, configurable.\par
+- Cross-Platform: Supports x64 and aarch64 architectures.\par
+- Warm-up Support: Options for statistical stability.\par
+\par
+\b Installation\b0\par
+\par
+Download the latest release binaries from the GitHub Releases page.\par
+\par
+\b Usage\b0\par
+\par
+\b 1. Initialization\b0\par
+Initialize the library before use. You can configure the buffer size and seeds.\par
+\par
+\f1 Unilox.Init(); // Default 4KB buffer\par
+\par
+// Custom configuration\par
+Unilox.Init(bufferSize: 16384, seed1: 123456789u, seed2: 987654321u, warm: 100000);\par
+\f0\par
+\b 2. Random Number Generation\b0\par
+\par
+\f1 // Single values\par
+int dice = Unilox.Randint(1, 6);\par
+float uni = Unilox.Randfloat(0f, 1f);\par
+\par
+// Batch generation (zero-copy)\par
+ReadOnlySpan<int> batch = Unilox.Randints(1000, -100, 100);\par
+ReadOnlySpan<float> gauss = Unilox.Randfloats(5000, 0f, 10f);\par
+\f0\par
+\b 3. Cleanup\b0\par
+Always free native resources when they are no longer needed.\par
+\par
+\f1 Unilox.Free(); // Always call to free native resources\par
+\f0\par
+\b Performance\b0\par
+\par
+- AMD Ryzen 7 9800X3D: 15ns/call, 1.2GB/s buffer fill\par
+- RPi Zero 2W:    85ns/call, 45MB/s buffer fill\par
+\par
+\b Output Ranges\b0\par
+\par
+- Randint(min, max) -> [min, max)\par
+- Randfloat(min, max) -> [min, max)\par
+\par
+\b Troubleshooting\b0\par
+\par
+- AccessViolation: Call Init() first, Free() after use\par
+- OutOfMemory: Reduce bufferSize (64KB max recommended)\par
+- Initial bias: Use warm parameter (100k-1M iterations)\par
+\par
+\b License\b0\par
+\par
+MIT License (c) 2026 cet\par
+}
