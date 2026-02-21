@@ -1,0 +1,21 @@
+{
+  "name": "URng",
+  "rootNamespace": "",
+  "references": [
+    "Unity.Burst",
+    "Unity.Collections",
+    "Unity.Jobs",
+    "Unity.Mathematics"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": true,
+  "overrideReferences": true,
+  "precompiledReferences": [
+    "urngw.dll"
+  ],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}
