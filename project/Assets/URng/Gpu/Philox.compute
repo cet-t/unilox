@@ -1,0 +1,116 @@
+#pragma kernel CSGenerateUint
+#pragma kernel CSGenerateRangeFloat
+#pragma kernel CSGenerateRangeInt
+
+#define THREAD_GROUP_SIZE 256
+
+static const uint PHILOX_M0 = 0xD2511F53u;
+static const uint PHILOX_M1 = 0xCD9E8D57u;
+static const uint PHILOX_W0 = 0x9E3779B9u;
+static const uint PHILOX_W1 = 0xBB67AE85u;
+
+RWStructuredBuffer<uint> _Result;
+
+uint _Key0;
+uint _Key1;
+uint _CounterBase;
+uint _Count;
+float _MinF;
+float _MaxF;
+uint _RangeI;
+int _MinI;
+
+uint umulhi(uint a, uint b)
+{
+    uint a_lo = a & 0xFFFFu;
+    uint a_hi = a >> 16;
+    uint b_lo = b & 0xFFFFu;
+    uint b_hi = b >> 16;
+
+    uint p0 = a_lo * b_lo;
+    uint p1 = a_lo * b_hi;
+    uint p2 = a_hi * b_lo;
+    uint p3 = a_hi * b_hi;
+
+    uint mid = (p0 >> 16) + (p1 & 0xFFFFu) + (p2 & 0xFFFFu);
+    return p3 + (p1 >> 16) + (p2 >> 16) + (mid >> 16);
+}
+
+uint4 philox4x32(uint4 ctr, uint2 key)
+{
+    [unroll]
+    for (int i = 0; i < 10; i++)
+    {
+        uint hi0 = umulhi(PHILOX_M0, ctr.x);
+        uint lo0 = PHILOX_M0 * ctr.x;
+        uint hi1 = umulhi(PHILOX_M1, ctr.z);
+        uint lo1 = PHILOX_M1 * ctr.z;
+
+        ctr = uint4(
+            hi1 ^ ctr.y ^ key.x,
+            lo1,
+            hi0 ^ ctr.w ^ key.y,
+            lo0
+        );
+
+        key.x += PHILOX_W0;
+        key.y += PHILOX_W1;
+    }
+    return ctr;
+}
+
+void WriteUint4(uint base_idx, uint4 v)
+{
+    _Result[base_idx] = v.x;
+    if (base_idx + 1 < _Count) _Result[base_idx + 1] = v.y;
+    if (base_idx + 2 < _Count) _Result[base_idx + 2] = v.z;
+    if (base_idx + 3 < _Count) _Result[base_idx + 3] = v.w;
+}
+
+uint4 Generate(uint tid)
+{
+    uint4 ctr = uint4(_CounterBase + tid, tid, 0u, 0u);
+    uint2 key = uint2(_Key0, _Key1);
+    return philox4x32(ctr, key);
+}
+
+[numthreads(THREAD_GROUP_SIZE, 1, 1)]
+void CSGenerateUint(uint3 id : SV_DispatchThreadID)
+{
+    uint tid = id.x;
+    uint base_idx = tid * 4;
+    if (base_idx >= _Count) return;
+
+    WriteUint4(base_idx, Generate(tid));
+}
+
+[numthreads(THREAD_GROUP_SIZE, 1, 1)]
+void CSGenerateRangeFloat(uint3 id : SV_DispatchThreadID)
+{
+    uint tid = id.x;
+    uint base_idx = tid * 4;
+    if (base_idx >= _Count) return;
+
+    uint4 r = Generate(tid);
+    float scale = (_MaxF - _MinF) / 4294967296.0;
+
+    _Result[base_idx] = asuint(r.x * scale + _MinF);
+    if (base_idx + 1 < _Count) _Result[base_idx + 1] = asuint(r.y * scale + _MinF);
+    if (base_idx + 2 < _Count) _Result[base_idx + 2] = asuint(r.z * scale + _MinF);
+    if (base_idx + 3 < _Count) _Result[base_idx + 3] = asuint(r.w * scale + _MinF);
+}
+
+[numthreads(THREAD_GROUP_SIZE, 1, 1)]
+void CSGenerateRangeInt(uint3 id : SV_DispatchThreadID)
+{
+    uint tid = id.x;
+    uint base_idx = tid * 4;
+    if (base_idx >= _Count) return;
+
+    uint4 r = Generate(tid);
+
+    _Result[base_idx] = (uint)((int)umulhi(r.x, _RangeI) + _MinI);
+    if (base_idx + 1 < _Count) _Result[base_idx + 1] = (uint)((int)umulhi(r.y, _RangeI) + _MinI);
+    if (base_idx + 2 < _Count) _Result[base_idx + 2] = (uint)((int)umulhi(r.z, _RangeI) + _MinI);
+    if (base_idx + 3 < _Count) _Result[base_idx + 3] = (uint)((int)umulhi(r.w, _RangeI) + _MinI);
+}

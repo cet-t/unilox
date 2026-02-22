@@ -11,7 +11,7 @@ using Cet.Rng.Gpu;
 
 namespace Cet.Rng.Tests
 {
-    public class URNGTest : MonoBehaviour
+    public class URngTest : MonoBehaviour
     {
         public Philox32Gpu philox32;
 
@@ -28,7 +28,7 @@ namespace Cet.Rng.Tests
             var sw = new System.Diagnostics.Stopwatch();
 
             {
-                using var rng = new URng32Seq<Job.SplitMix32>(N, Allocator.Persistent);
+                using var rng = new SplitMix32Seq(N, Allocator.Persistent);
                 sw.Restart();
                 for (int i = 0; i < 10; i++)
                 {
@@ -39,7 +39,7 @@ namespace Cet.Rng.Tests
             }
 
             {
-                using var rng = new URng64Seq<Job.Xoshiro256Ss>(N, Allocator.Persistent);
+                using var rng = new Xoshiro256SsSeq(N, Allocator.Persistent);
                 sw.Restart();
                 for (int i = 0; i < 10; i++)
                 {
@@ -50,7 +50,18 @@ namespace Cet.Rng.Tests
             }
 
             {
-                using var rng = new URng32Seq<Job.Mt19937>(N, Allocator.Persistent);
+                using var rng = new Xoshiro256PpSeq(N, Allocator.Persistent);
+                sw.Restart();
+                for (int i = 0; i < 10; i++)
+                {
+                    _ = rng.Fill(N, (uint)i);
+                }
+                sw.Stop();
+                times.Add("URng.Job.Xoshiro256++", sw.Elapsed);
+            }
+
+            {
+                using var rng = new Mt19937Seq(N, Allocator.Persistent);
                 sw.Restart();
                 for (int i = 0; i < 10; i++)
                 {
@@ -66,7 +77,7 @@ namespace Cet.Rng.Tests
                 sw.Restart();
                 for (int i = 0; i < 10; i++)
                 {
-                    philox32.RandF(results, 0, 1);
+                    philox32.GetRandomFloats(results, 0, 1);
                 }
                 sw.Stop();
                 results = null;
@@ -214,6 +225,39 @@ namespace Cet.Rng.Tests
                 }
                 sw.Stop();
                 times.Add("URng.Philox64", sw.Elapsed);
+            }
+
+            {
+                using var rng = new Philox32x4Seq(N, Allocator.Persistent);
+                sw.Restart();
+                for (int i = 0; i < M; i++)
+                {
+                    _ = rng.Fill(N, (uint)i);
+                }
+                sw.Stop();
+                times.Add("URng.Job.Philox32x4 IJob", sw.Elapsed);
+            }
+
+            {
+                using var rng = new Philox32x4Seq(N, Allocator.Persistent);
+                sw.Restart();
+                for (int i = 0; i < M; i++)
+                {
+                    _ = rng.FillParallel(N, (uint)i);
+                }
+                sw.Stop();
+                times.Add("URng.Job.Philox32x4 Parallel", sw.Elapsed);
+            }
+
+            {
+                using var rng = new Philox64x2Seq(N, Allocator.Persistent);
+                sw.Restart();
+                for (int i = 0; i < M; i++)
+                {
+                    _ = rng.Fill(N, (uint)i);
+                }
+                sw.Stop();
+                times.Add("URng.Job.Philox64x2 IJob", sw.Elapsed);
             }
 
             {

@@ -5,100 +5,163 @@ using Unity.Jobs;
 
 namespace Cet.Rng.Job
 {
-    public struct URng32Seq<T> : IDisposable where T : struct, IRng32Job
-    {
-        public NativeArray<uint> Results;
-        private Allocator _allocator;
-
-        public URng32Seq(int maxCount, Allocator allocator = Allocator.TempJob)
-        {
-            Results = new(maxCount, allocator);
-            _allocator = allocator;
-        }
-
-        public NativeArray<uint> Fill(int count, uint seed)
-        {
-            var job = new URng32Job<T>
-            {
-                Results = Results,
-                Seed = seed | 1
-            };
-
-            job.Schedule(count, 64).Complete();
-
-            return Results;
-        }
-
-        public void Dispose()
-        {
-            if (Results.IsCreated)
-            {
-                Results.Dispose();
-            }
-        }
-    }
+    // =========================================================================
+    //  Burst-compiled concrete Job structs for each 32-bit RNG
+    // =========================================================================
 
     [BurstCompile]
-    struct URng32Job<T> : IJobParallelFor
-        where T : struct, IRng32Job, IDisposable
+    public struct SplitMix32Job : IJobParallelFor
     {
         [WriteOnly] public NativeArray<uint> Results;
         public uint Seed;
 
         public void Execute(int index)
         {
-            using T gen = default;
+            var gen = default(SplitMix32);
             gen.Init(Seed + (uint)index);
             Results[index] = gen.NextU();
         }
     }
 
-    public struct URng64Seq<T> : IDisposable where T : struct, IRng64Job
+    [BurstCompile]
+    public struct Mt19937Job : IJob
     {
-        public NativeArray<ulong> Results;
-        private Allocator _allocator;
+        [WriteOnly] public NativeArray<uint> Results;
+        public uint Seed;
+        public int Count;
 
-        public URng64Seq(int maxCount, Allocator allocator = Allocator.TempJob)
+        public void Execute()
         {
-            Results = new(maxCount, allocator);
-            _allocator = allocator;
-        }
-
-        public NativeArray<ulong> Fill(int count, ulong seed)
-        {
-            var job = new URng64Job<T>
+            var gen = default(Mt19937);
+            gen.Init(Seed);
+            for (int i = 0; i < Count; i++)
             {
-                Results = Results,
-                Seed = seed | 1
-            };
-
-            job.Schedule(count, 64).Complete();
-
-            return Results;
-        }
-
-        public void Dispose()
-        {
-            if (Results.IsCreated)
-            {
-                Results.Dispose();
+                Results[i] = gen.NextU();
             }
         }
     }
 
+    // =========================================================================
+    //  Burst-compiled concrete Job structs for each 64-bit RNG
+    // =========================================================================
+
     [BurstCompile]
-    struct URng64Job<T> : IJobParallelFor
-    where T : struct, IRng64Job, IDisposable
+    public struct Xoshiro256PpJob : IJobParallelFor
     {
         [WriteOnly] public NativeArray<ulong> Results;
         public ulong Seed;
 
         public void Execute(int index)
         {
-            using T gen = default;
+            var gen = default(Xoshiro256Pp);
             gen.Init(Seed + (ulong)index);
             Results[index] = gen.NextU();
         }
     }
 
+    [BurstCompile]
+    public struct Xoshiro256SsJob : IJobParallelFor
+    {
+        [WriteOnly] public NativeArray<ulong> Results;
+        public ulong Seed;
+
+        public void Execute(int index)
+        {
+            var gen = default(Xoshiro256Ss);
+            gen.Init(Seed + (ulong)index);
+            Results[index] = gen.NextU();
+        }
+    }
+
+    // =========================================================================
+    //  Seq wrappers — thin API layer over the concrete Burst Jobs
+    // =========================================================================
+
+    public struct SplitMix32Seq : IDisposable
+    {
+        public NativeArray<uint> Results;
+
+        public SplitMix32Seq(int maxCount, Allocator allocator = Allocator.TempJob)
+        {
+            Results = new(maxCount, allocator);
+        }
+
+        public NativeArray<uint> Fill(int count, uint seed)
+        {
+            new SplitMix32Job { Results = Results, Seed = seed | 1 }
+                .Schedule(count, 64).Complete();
+            return Results;
+        }
+
+        public void Dispose()
+        {
+            if (Results.IsCreated) Results.Dispose();
+        }
+    }
+
+    public struct Mt19937Seq : IDisposable
+    {
+        public NativeArray<uint> Results;
+
+        public Mt19937Seq(int maxCount, Allocator allocator = Allocator.TempJob)
+        {
+            Results = new(maxCount, allocator);
+        }
+
+        public NativeArray<uint> Fill(int count, uint seed)
+        {
+            new Mt19937Job { Results = Results, Seed = seed | 1, Count = count }
+                .Schedule().Complete();
+            return Results;
+        }
+
+        public void Dispose()
+        {
+            if (Results.IsCreated) Results.Dispose();
+        }
+    }
+
+    public struct Xoshiro256PpSeq : IDisposable
+    {
+        public NativeArray<ulong> Results;
+
+        public Xoshiro256PpSeq(int maxCount, Allocator allocator = Allocator.TempJob)
+        {
+            Results = new(maxCount, allocator);
+        }
+
+        public NativeArray<ulong> Fill(int count, ulong seed)
+        {
+            new Xoshiro256PpJob { Results = Results, Seed = seed | 1 }
+                .Schedule(count, 64).Complete();
+            return Results;
+        }
+
+        public void Dispose()
+        {
+            if (Results.IsCreated) Results.Dispose();
+        }
+    }
+
+    public struct Xoshiro256SsSeq : IDisposable
+    {
+        public NativeArray<ulong> Results;
+
+        public Xoshiro256SsSeq(int maxCount, Allocator allocator = Allocator.TempJob)
+        {
+            Results = new(maxCount, allocator);
+        }
+
+        public NativeArray<ulong> Fill(int count, ulong seed)
+        {
+            new Xoshiro256SsJob { Results = Results, Seed = seed | 1 }
+                .Schedule(count, 64).Complete();
+            return Results;
+        }
+
+        public void Dispose()
+        {
+            if (Results.IsCreated) Results.Dispose();
+        }
+    }
 }

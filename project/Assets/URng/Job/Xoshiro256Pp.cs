@@ -5,22 +5,22 @@ using Unity.Burst;
 namespace Cet.Rng.Job
 {
     [BurstCompile]
-    public struct Xoshiro256Ss : IRng64Job
+    public struct Xoshiro256Pp : IRng64Job
     {
         private ulong a, b, c, d;
 
         public void Init(ulong seed)
         {
-            this.a = seed ^ 0x72e604304b60b703;
-            this.b = seed ^ 0x2014fb9d4d360be6;
-            this.c = seed ^ 0x3ce8a73bbc43e3ca;
-            this.d = seed ^ 0xc9cabbbb64102ceb;
+            this.a = seed ^ 0xaf6bcb117fc38b58;
+            this.b = seed ^ 0x8634ddd9ad84f19f;
+            this.c = seed ^ 0x277bff772d63c7e2;
+            this.d = seed ^ 0x4b575eff6b159516;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ulong NextU()
         {
-            var res = unchecked((this.b * 5).RotateLeft(7) * 9);
+            var res = (this.a + this.c).RotateLeft(23) + this.a;
             var t = this.b << 17;
 
             this.c ^= this.a;
@@ -29,7 +29,7 @@ namespace Cet.Rng.Job
             this.a ^= this.d;
 
             this.c ^= t;
-            this.d = this.d.RotateLeft(45);
+            this.d = this.c.RotateLeft(45);
 
             return res;
         }

@@ -314,9 +314,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6fb864a7dfa4b6c4f982143de66acc36, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pointObj: {fileID: 9087739999449212857, guid: d0159dd3eb1467e4eb878c7a12cbc6a5, type: 3}
-  pointParent: {fileID: 2125316510}
-  pointCount: 1000
 --- !u!1 &894582730
 GameObject:
   m_ObjectHideFlags: 0
@@ -773,9 +770,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 1166595335}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3d063eb8fcd0ec94b84198191c7f5ca4, type: 3}
+  m_Script: {fileID: 11500000, guid: cbcf407154a80d74e874d55431228279, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  philox32:
+    shader: {fileID: 7200000, guid: 455e248e2012613469ce51781085c96d, type: 3}
 --- !u!1 &1410970953
 GameObject:
   m_ObjectHideFlags: 0
