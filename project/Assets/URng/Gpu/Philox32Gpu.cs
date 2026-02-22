@@ -34,7 +34,6 @@ namespace Cet.Rng.Gpu
 
         // kernel ids
         int _kUint, _kFloat, _kInt;
-        bool _initialized;
 
         /// <summary>Initializes with a single seed.</summary>
         public void Init(uint seed)
@@ -50,15 +49,13 @@ namespace Cet.Rng.Gpu
             _counterBase = 0;
             _cachePos = CacheSize; // force refill
 
-            _kUint  = shader.FindKernel("CSGenerateUint");
+            _kUint = shader.FindKernel("CSGenerateUint");
             _kFloat = shader.FindKernel("CSGenerateRangeFloat");
-            _kInt   = shader.FindKernel("CSGenerateRangeInt");
+            _kInt = shader.FindKernel("CSGenerateRangeInt");
 
             _cache = new uint[CacheSize];
             _cacheBuf?.Release();
             _cacheBuf = new ComputeBuffer(CacheSize, sizeof(uint));
-
-            _initialized = true;
         }
 
         // ======== Single value ========
@@ -167,7 +164,6 @@ namespace Cet.Rng.Gpu
             _cacheBuf = null;
             _batchBuf?.Release();
             _batchBuf = null;
-            _initialized = false;
         }
     }
 }
