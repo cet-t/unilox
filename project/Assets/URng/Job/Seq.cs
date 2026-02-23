@@ -41,6 +41,26 @@ namespace Cet.Rng.Job
         }
     }
 
+    [BurstCompile]
+    public struct Pcg32Job : IJob
+    {
+        [WriteOnly] public NativeArray<uint> Results;
+        public uint Seed;
+        public int Count;
+
+        public void Execute()
+        {
+            var gen = default(Pcg32);
+            gen.Init(Seed);
+            for (int i = 0; i < Count; i++)
+            {
+                Results[i] = gen.NextU();
+            }
+        }
+    }
+
+
+
     // =========================================================================
     //  Burst-compiled concrete Job structs for each 64-bit RNG
     // =========================================================================
@@ -68,6 +88,34 @@ namespace Cet.Rng.Job
         public void Execute(int index)
         {
             var gen = default(Xoshiro256Ss);
+            gen.Init(Seed + (ulong)index);
+            Results[index] = gen.NextU();
+        }
+    }
+
+    [BurstCompile]
+    public struct Sfc64Job : IJobParallelFor
+    {
+        [WriteOnly] public NativeArray<ulong> Results;
+        public ulong Seed;
+
+        public void Execute(int index)
+        {
+            var gen = default(Sfc64);
+            gen.Init(Seed + (ulong)index);
+            Results[index] = gen.NextU();
+        }
+    }
+
+    [BurstCompile]
+    public struct SplitMix64Job : IJobParallelFor
+    {
+        [WriteOnly] public NativeArray<ulong> Results;
+        public ulong Seed;
+
+        public void Execute(int index)
+        {
+            var gen = default(SplitMix64);
             gen.Init(Seed + (ulong)index);
             Results[index] = gen.NextU();
         }
@@ -121,6 +169,28 @@ namespace Cet.Rng.Job
         }
     }
 
+    public struct Pcg32Seq : IDisposable
+    {
+        public NativeArray<uint> Results;
+
+        public Pcg32Seq(int maxCount, Allocator allocator = Allocator.TempJob)
+        {
+            Results = new(maxCount, allocator);
+        }
+
+        public NativeArray<uint> Fill(int count, uint seed)
+        {
+            new Pcg32Job { Results = Results, Seed = seed | 1, Count = count }
+                .Schedule().Complete();
+            return Results;
+        }
+
+        public void Dispose()
+        {
+            if (Results.IsCreated) Results.Dispose();
+        }
+    }
+
     public struct Xoshiro256PpSeq : IDisposable
     {
         public NativeArray<ulong> Results;
@@ -155,6 +225,50 @@ namespace Cet.Rng.Job
         public NativeArray<ulong> Fill(int count, ulong seed)
         {
             new Xoshiro256SsJob { Results = Results, Seed = seed | 1 }
+                .Schedule(count, 64).Complete();
+            return Results;
+        }
+
+        public void Dispose()
+        {
+            if (Results.IsCreated) Results.Dispose();
+        }
+    }
+
+    public struct Sfc64Seq : IDisposable
+    {
+        public NativeArray<ulong> Results;
+
+        public Sfc64Seq(int maxCount, Allocator allocator = Allocator.TempJob)
+        {
+            Results = new(maxCount, allocator);
+        }
+
+        public NativeArray<ulong> Fill(int count, ulong seed)
+        {
+            new Sfc64Job { Results = Results, Seed = seed | 1 }
+                .Schedule(count, 64).Complete();
+            return Results;
+        }
+
+        public void Dispose()
+        {
+            if (Results.IsCreated) Results.Dispose();
+        }
+    }
+
+    public struct SplitMix64Seq : IDisposable
+    {
+        public NativeArray<ulong> Results;
+
+        public SplitMix64Seq(int maxCount, Allocator allocator = Allocator.TempJob)
+        {
+            Results = new(maxCount, allocator);
+        }
+
+        public NativeArray<ulong> Fill(int count, ulong seed)
+        {
+            new SplitMix64Job { Results = Results, Seed = seed | 1 }
                 .Schedule(count, 64).Complete();
             return Results;
         }

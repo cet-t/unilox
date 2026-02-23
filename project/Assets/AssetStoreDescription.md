@@ -28,7 +28,7 @@ _Note: Ultimate RNG is strictly specialized for batch generation and is not inte
 - **Multiple Backends**:
   - **Job System / Burst Compiler**: Native C# high-speed generation (Xoshiro256\*\*, Xoshiro256++, SplitMix).
   - **Compute Shader**: Direct-to-GPU generation (Philox32) for zero CPU overhead.
-  - **Rust Native Plugins**: The absolute gold standard in statistical quality and performance (MT19937, SFMT, SFC64, PCG32, etc.).
+  - **Rust Native Plugins**: The absolute gold standard in statistical quality and performance (MT19937, SFMT, SFC64, PCG32, etc.). The internal state of these Rust implementations is securely initialized from the seed using the SplitMix32/64 algorithm.
 - **Data-Oriented Design**: Built natively for use with `NativeArray`, `Span<T>`, and the Unity Job System.
 - **Unified Interface**: Clean, consistent API whether generating from Jobs, Compute Shaders, or Native Plugins.
 - **Extensive Benchmarks**: Comes with an integrated Demo scene to benchmark the performance in your own specific environment.

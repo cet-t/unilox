@@ -30,7 +30,7 @@ namespace Cet.Rng.Tests
             {
                 using var rng = new SplitMix32Seq(N, Allocator.Persistent);
                 sw.Restart();
-                for (int i = 0; i < 10; i++)
+                for (int i = 0; i < M; i++)
                 {
                     _ = rng.Fill(N, (uint)i);
                 }
@@ -41,7 +41,7 @@ namespace Cet.Rng.Tests
             {
                 using var rng = new Xoshiro256SsSeq(N, Allocator.Persistent);
                 sw.Restart();
-                for (int i = 0; i < 10; i++)
+                for (int i = 0; i < M; i++)
                 {
                     _ = rng.Fill(N, (uint)i);
                 }
@@ -52,7 +52,7 @@ namespace Cet.Rng.Tests
             {
                 using var rng = new Xoshiro256PpSeq(N, Allocator.Persistent);
                 sw.Restart();
-                for (int i = 0; i < 10; i++)
+                for (int i = 0; i < M; i++)
                 {
                     _ = rng.Fill(N, (uint)i);
                 }
@@ -61,9 +61,31 @@ namespace Cet.Rng.Tests
             }
 
             {
+                using var rng = new Sfc64Seq(N, Allocator.Persistent);
+                sw.Restart();
+                for (int i = 0; i < M; i++)
+                {
+                    _ = rng.Fill(N, (uint)i);
+                }
+                sw.Stop();
+                times.Add("URng.Job.Sfc64", sw.Elapsed);
+            }
+
+            {
+                using var rng = new SplitMix64Seq(N, Allocator.Persistent);
+                sw.Restart();
+                for (int i = 0; i < M; i++)
+                {
+                    _ = rng.Fill(N, (uint)i);
+                }
+                sw.Stop();
+                times.Add("URng.Job.SplitMix64", sw.Elapsed);
+            }
+
+            {
                 using var rng = new Mt19937Seq(N, Allocator.Persistent);
                 sw.Restart();
-                for (int i = 0; i < 10; i++)
+                for (int i = 0; i < M; i++)
                 {
                     _ = rng.Fill(N, (uint)i);
                 }
@@ -72,10 +94,21 @@ namespace Cet.Rng.Tests
             }
 
             {
+                using var rng = new Pcg32Seq(N, Allocator.Persistent);
+                sw.Restart();
+                for (int i = 0; i < M; i++)
+                {
+                    _ = rng.Fill(N, (uint)i);
+                }
+                sw.Stop();
+                times.Add("URng.Job.Pcg32", sw.Elapsed);
+            }
+
+            {
                 var results = new float[N];
                 philox32.Init(1);
                 sw.Restart();
-                for (int i = 0; i < 10; i++)
+                for (int i = 0; i < M; i++)
                 {
                     philox32.GetRandomFloats(results, 0, 1);
                 }
