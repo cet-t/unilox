@@ -1,0 +1,217 @@
+{\rtf1\ansi\ansicpg1252\deff0\nouicompat\deflang1033{\fonttbl{\f0\fnil\fcharset0 Consolas;}} \f0\fs22 # Ultimate RNG\par
+\par
+**Ultimate RNG** is a high-speed, high-performance random number generator package specifically optimized for batch generation (procedural generation) in Unity.\par
+\par
+## Table of Contents\par
+\par
+1. [Features](#1-features)\par
+2. [Setup Guide](#2-setup-guide)\par
+3. [Supported Algorithms and Use Cases](#3-supported-algorithms-and-use-cases)\par
+4. [Known Issues](#4-known-issues)\par
+5. [Quick Start / Usage Examples](#5-quick-start--usage-examples)\par
+6. [Benchmarks](#6-benchmarks)\par
+\par
+---\par
+\par
+## 1. Features\par
+\par
+- **High Speed & Efficiency**: Achieves blazingly fast random number generation by utilizing Unity's C# Job System (Burst Compiler), Compute Shaders, and native Rust plugins.\par
+- **Optimized for Procedural Generation**: Designed for batch processing where massive amounts of random numbers need to be generated simultaneously, making it ideal for terrain generation, particle systems, and large-scale simulations.\par
+\par
+> [!IMPORTANT]\par
+> **Not a Drop-in Replacement for Unity.Mathematics.Random or System.Random**\par
+> Ultimate RNG is specialized for batch generation and data-oriented design. It is _not_ intended to replace the standard Unity or C# random number generators for simple, everyday gameplay logic (like a simple dice roll in an `Update` loop).\par
+\par
+---\par
+\par
+## 2. Setup Guide\par
+\par
+Follow these steps to fully integrate Ultimate RNG into your Unity project.\par
+\par
+### Step 1: Import the Package\par
+\par
+1. Download the Ultimate RNG package from the Unity Asset Store.\par
+2. In Unity, select `Assets` > `Import Package` > `Custom Package...` and choose the downloaded file.\par
+3. Import all files into your project.\par
+\par
+### Step 2: Install Required Dependencies\par
+\par
+To achieve the maximum performance for Job-based RNGs, ensure that the **Burst** package is installed in your project.\par
+\par
+1. Open the Package Manager (`Window` > `Package Manager`).\par
+2. Search for the **Burst** package under `Packages: Unity Registry`.\par
+3. Click `Install` if it is not already installed.\par
+\par
+### Step 3: Reference the Namespaces\par
+\par
+In your C# scripts, include the appropriate namespaces depending on the algorithm you choose to use:\par
+\par
+- `using Cet.Rng;` for Native Rust PRNGs.\par
+- `using Cet.Rng.Job;` for C# Job System and Burst Compiler PRNGs.\par
+- `using Cet.Rng.Gpu;` for Compute Shader based PRNGs.\par
+\par
+You are now ready to start using Ultimate RNG algorithms. Please refer to Section 5 for code examples.\par
+\par
+---\par
+\par
+## 3. Supported Algorithms and Use Cases\par
+\par
+Ultimate RNG provides a variety of algorithms, allowing you to choose the best tool for your specific performance and quality requirements.\par
+\par
+### 3.1. Speed-Optimized: Xoshiro256\\*\\* / Xoshiro256++ (Burst / Job)\par
+\par
+- **Use Case**: When maximum generation speed is required on the CPU.\par
+- **Description**: Implemented using Unity's C# Job System and Burst Compiler. These generators provide remarkable single-thread and multi-thread performance, offering a perfect balance between speed and statistical quality for most game development needs.\par
+\par
+### 3.2. CPU-Offloading: Philox32 (Compute Shader)\par
+\par
+- **Use Case**: When you want to alleviate CPU load by moving generation to the GPU.\par
+- **Description**: A counter-based PRNG implemented in Compute Shaders. It allows you to generate millions of random numbers directly on the GPU, keeping the CPU entirely free for main game logic. Perfect for GPU-based particle simulations and compute-heavy terrain generation.\par
+\par
+### 3.3. High Quality: Mt19937 & Sfmt19937 (Rust Native)\par
+\par
+- **Use Case**: When strict statistical quality and extensively long periods are paramount.\par
+- **Description**: The standard Mersenne Twister (`Mt19937`) and the SIMD-oriented Fast Mersenne Twister (`Sfmt19937`), implemented in highly optimized native Rust. These provide the cryptographic-like gold standard for PRNG predictability and distribution.\par
+\par
+### 3.4. Fast & Chaotic: Sfc64 (Rust Native)\par
+\par
+- **Use Case**: When a strong balance of high speed, small state size, and chaotic properties is needed.\par
+- **Description**: Small Fast Chaotic PRNG implemented in Rust. Excellent for initializing other states or when you need a fast native generator with a smaller memory footprint than Mersenne Twister.\par
+\par
+---\par
+\par
+## 4. Known Issues\par
+\par
+> [!WARNING]\par
+> **Identical Patterns in Specific Implementations**\par
+> Under certain conditions, specifically when using the Rust native implementations of **`Philox32`** and **`Pcg32`**, they may generate identical random number sequences or identical patterns depending on the initial seed and internal state configuration. Please be cautious when using these specific implementations if strict uniqueness across different seeds is required.\par
+\par
+---\par
+\par
+## 5. Quick Start / Usage Examples\par
+\par
+Below are simplified examples of how to generate batches of random numbers using the three different backend approaches provided by Ultimate RNG.\par
+\par
+### 5.1. Job System / Burst Compiler (High Performance C#)\par
+\par
+This approach is highly recommended for most Unity standard use cases where you need heavy random generation without leaving C#.\par
+\par
+```csharp\par
+using Cet.Rng.Job;\par
+using Unity.Collections;\par
+using UnityEngine;\par
+\par
+public class JobRngExample : MonoBehaviour\par
+\{\par
+    void Start()\par
+    \{\par
+        int count = 1_000_000;\par
+        uint seed = 12345;\par
+\par
+        // Create a sequence generator with Persistent allocator\par
+        using var rng = new Xoshiro256SsSeq(count, Allocator.Persistent);\par
+\par
+        // Fill the internal buffer with random numbers.\par
+        // This is extremely fast and can also be run parallel (FillParallel).\par
+        rng.Fill(count, seed);\par
+\par
+        // The numbers are now ready to be used from the NativeArray inside the sequence.\par
+        // For instance, passing rng.Result to other IJobParallelFor jobs.\par
+    \}\par
+\}\par
+```\par
+\par
+### 5.2. Rust Native Plugin (Cryptographic-like Quality)\par
+\par
+When you need the absolute highest statistical quality or specific algorithms like SFMT.\par
+\par
+```csharp\par
+using Cet.Rng;\par
+using UnityEngine;\par
+\par
+public class RustNativeExample : MonoBehaviour\par
+\{\par
+    void Start()\par
+    \{\par
+        int count = 1_000_000;\par
+        uint seed = 42;\par
+\par
+        // Initialize Native PRNG (e.g. SIMD-oriented Fast MT)\par
+        using var sfmt = new Sfmt1993764(seed);\par
+\par
+        // Generate a large batch into a NativeArray/Span efficiently\par
+        var randomFloats = sfmt.NextF64s(count);\par
+\par
+        Debug.Log($"Generated \{randomFloats.Length\} random numbers!");\par
+    \}\par
+\}\par
+```\par
+\par
+### 5.3. Compute Shader (GPU Generation)\par
+\par
+Ideal for offloading extreme workloads to the GPU.\par
+\par
+```csharp\par
+using Cet.Rng.Gpu;\par
+using UnityEngine;\par
+\par
+public class GpuRngExample : MonoBehaviour\par
+\{\par
+    // Assign via Inspector\par
+    public Philox32Gpu philox32;\par
+\par
+    void Start()\par
+    \{\par
+        int count = 1_000_000;\par
+        uint seed = 999;\par
+        var results = new float[count];\par
+\par
+        // Initialize with seed\par
+        philox32.Init(seed);\par
+\par
+        // Dispatch Compute Shader to generate random floats natively on GPU\par
+        philox32.GetRandomFloats(results, 0, 1);\par
+\par
+        Debug.Log($"First GPU Random: \{results[0]\}");\par
+    \}\par
+\}\par
+```\par
+\par
+---\par
+\par
+## 6. Benchmarks\par
+\par
+Performance comparison for generating **10,000,000** random numbers.\par
+Tested environments may vary, but this illustrates the relative speed of each implementation compared to standard Unity/C# generators.\par
+\par
+| Generator                        |   Time (ms) |         Relative Speed |\par
+| :------------------------------- | ----------: | ---------------------: |\par
+| **URng.Job.Xoshiro256++**        | **1.35 ms** | **100.00% (Baseline)** |\par
+| **URng.Job.Xoshiro256\\*\\***      |     1.49 ms |                109.80% |\par
+| **URng.Job.SplitMix32**          |     1.52 ms |                111.98% |\par
+| **URng.Job.Philox32x4 Parallel** |     1.77 ms |                130.77% |\par
+| **URng.Gpu.Philox32**            |     5.28 ms |                390.20% |\par
+| **URng.Sfc64** (Rust)            |     5.85 ms |                432.27% |\par
+| **URng.Xorshift64** (Rust)       |     6.45 ms |                476.39% |\par
+| **URng.Sfmt19937** (Rust)        |     6.71 ms |                495.82% |\par
+| **URng.Philox32** (Rust)         |     7.45 ms |                550.46% |\par
+| **URng.Xoshiro256++** (Rust)     |     7.45 ms |                550.66% |\par
+| **URng.Xoshiro256\\*\\*** (Rust)   |     7.74 ms |                572.02% |\par
+| **URng.Mt19937** (Rust)          |     8.22 ms |                607.42% |\par
+| **URng.Pcg32** (Rust)            |     8.80 ms |                650.43% |\par
+| **URng.Sfmt19937-64** (Rust)     |     9.73 ms |                719.38% |\par
+| **URng.Job.Philox32x4 IJob**     |    11.58 ms |                856.02% |\par
+| **URng.Mt19937-64** (Rust)       |    12.60 ms |                931.12% |\par
+| **URng.Job.Mt19937**             |    12.68 ms |                937.22% |\par
+| **URng.Philox64** (Rust)         |    24.49 ms |               1809.77% |\par
+| **URng.Xorshift32** (Rust)       |    27.94 ms |               2064.63% |\par
+| **URng.Xorshift128** (Rust)      |    28.94 ms |               2138.87% |\par
+| **URng.Job.Philox64x2 IJob**     |    32.15 ms |               2376.07% |\par
+| `Unity.Mathematics.Random`       |    40.21 ms |               2971.53% |\par
+| `UnityEngine.Random`             |    71.46 ms |               5281.39% |\par
+| `System.Random`                  |    90.74 ms |               6705.98% |\par
+\par
+> [!NOTE]\par
+> Lower time is better. `URng` implementations using the Burst compiler (`URng.Job`) show massive performance gains, up to **~67x faster** than standard `System.Random` and **~52x faster** than `UnityEngine.Random` for massive bulk generation workloads!\par
+
+}
