@@ -24,7 +24,7 @@ _Note: Ultimate RNG is strictly specialized for batch generation and is not inte
 
 **Key Features:**
 
-- **Blazing Fast Performance**: Achieve up to 67x faster generation speeds compared to standard Unity or C# generators on bulk workloads.
+- **Blazing Fast Performance**: Achieve up to 111x faster generation speeds compared to standard Unity or C# generators on bulk workloads.
 - **Multiple Backends**:
   - **Job System / Burst Compiler**: Native C# high-speed generation (Xoshiro256\*\*, Xoshiro256++, SplitMix).
   - **Compute Shader**: Direct-to-GPU generation (Philox32) for zero CPU overhead.
@@ -39,6 +39,6 @@ _Note: Ultimate RNG is strictly specialized for batch generation and is not inte
 - Philox32 / Philox64
 - Mersenne Twister (Mt19937 / Mt19937-64 / Sfmt19937 / Sfmt19937-64)
 - Sfc64
-- SplitMix32
+- SplitMix32 / SplitMix64
 - Pcg32
 - Xorshift variants
