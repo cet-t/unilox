@@ -75,6 +75,7 @@ namespace Cet.Rng.Tests
             TestNativeRng32("URng.Xorshift128", () => new Xorshift128(1, 2, 3, 4));
             TestNativeRng32("URng.Pcg32", () => new Pcg32(42));
             TestNativeRng32("URng.Philox32", () => new Cet.Rng.Philox32(42, 1));
+            TestNativeRng32("URng.SplitMix32", () => new Cet.Rng.SplitMix32(42));
 
             // ── Cet.Rng Native (Rust) 64-bit RNGs ──
             TestNativeRng64("URng.Mt19937-64", () => new Mt1993764(42));
@@ -84,6 +85,7 @@ namespace Cet.Rng.Tests
             TestNativeRng64("URng.Xoshiro256Ss", () => new Cet.Rng.Xoshiro256Ss(42));
             TestNativeRng64("URng.Xoshiro256Pp", () => new Cet.Rng.Xoshiro256Pp(42));
             TestNativeRng64("URng.Philox64", () => new Cet.Rng.Philox64(42));
+            TestNativeRng64("URng.SplitMix64", () => new Cet.Rng.SplitMix64(42));
 
             // ── Job-based 32-bit RNGs ──
             TestRng32<Job.SplitMix32>("Job.SplitMix32", 42);
@@ -91,6 +93,7 @@ namespace Cet.Rng.Tests
             TestRng32<Job.Philox32x4>("Job.Philox32x4", 42);
 
             // ── Job-based 64-bit RNGs ──
+            TestRng64<Job.SplitMix64>("Job.SplitMix64", 42);
             TestRng64<Job.Xoshiro256Ss>("Job.Xoshiro256Ss", 42);
             TestRng64<Job.Xoshiro256Pp>("Job.Xoshiro256Pp", 42);
             TestRng64<Job.Philox64x2>("Job.Philox64x2", 42);

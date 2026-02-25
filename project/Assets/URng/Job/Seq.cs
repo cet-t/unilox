@@ -9,6 +9,16 @@ namespace Cet.Rng.Job
     //  Burst-compiled concrete Job structs for each 32-bit RNG
     // =========================================================================
 
+    public interface ISeq64 : IDisposable
+    {
+        NativeArray<ulong> Fill(int count, ulong seed);
+    }
+
+    public interface ISeq32 : IDisposable
+    {
+        NativeArray<uint> Fill(int count, uint seed);
+    }
+
     [BurstCompile]
     public struct SplitMix32Job : IJobParallelFor
     {
@@ -125,7 +135,7 @@ namespace Cet.Rng.Job
     //  Seq wrappers — thin API layer over the concrete Burst Jobs
     // =========================================================================
 
-    public struct SplitMix32Seq : IDisposable
+    public struct SplitMix32Seq : ISeq32
     {
         public NativeArray<uint> Results;
 
@@ -147,7 +157,7 @@ namespace Cet.Rng.Job
         }
     }
 
-    public struct Mt19937Seq : IDisposable
+    public struct Mt19937Seq : ISeq32
     {
         public NativeArray<uint> Results;
 
@@ -169,7 +179,7 @@ namespace Cet.Rng.Job
         }
     }
 
-    public struct Pcg32Seq : IDisposable
+    public struct Pcg32Seq : ISeq32
     {
         public NativeArray<uint> Results;
 
@@ -191,7 +201,7 @@ namespace Cet.Rng.Job
         }
     }
 
-    public struct Xoshiro256PpSeq : IDisposable
+    public struct Xoshiro256PpSeq : ISeq64
     {
         public NativeArray<ulong> Results;
 
@@ -213,7 +223,7 @@ namespace Cet.Rng.Job
         }
     }
 
-    public struct Xoshiro256SsSeq : IDisposable
+    public struct Xoshiro256SsSeq : ISeq64
     {
         public NativeArray<ulong> Results;
 
@@ -235,7 +245,7 @@ namespace Cet.Rng.Job
         }
     }
 
-    public struct Sfc64Seq : IDisposable
+    public struct Sfc64Seq : ISeq64
     {
         public NativeArray<ulong> Results;
 
@@ -257,7 +267,7 @@ namespace Cet.Rng.Job
         }
     }
 
-    public struct SplitMix64Seq : IDisposable
+    public struct SplitMix64Seq : ISeq64
     {
         public NativeArray<ulong> Results;
 

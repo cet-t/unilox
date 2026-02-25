@@ -151,7 +151,7 @@ namespace Cet.Rng.Job
                     out uint o0, out uint o1, out uint o2, out uint o3);
 
                 int b = i << 2;
-                ptr[b]     = o0;
+                ptr[b] = o0;
                 ptr[b + 1] = o1;
                 ptr[b + 2] = o2;
                 ptr[b + 3] = o3;
@@ -176,15 +176,20 @@ namespace Cet.Rng.Job
                 out uint o0, out uint o1, out uint o2, out uint o3);
 
             int b = index << 2;
-            ptr[b]     = o0;
+            ptr[b] = o0;
             ptr[b + 1] = o1;
             ptr[b + 2] = o2;
             ptr[b + 3] = o3;
         }
     }
 
+    public interface IParSeq32 : IDisposable
+    {
+        NativeArray<uint> FillParallel(int count, uint seed, int batchSize = 256);
+    }
+
     // ==== Seq wrapper ====
-    public struct Philox32x4Seq : IDisposable
+    public struct Philox32x4Seq : ISeq32, IParSeq32
     {
         public NativeArray<uint> Results;
 
@@ -199,7 +204,10 @@ namespace Cet.Rng.Job
             uint k1 = seed ^ 0xBB67AE85u;
             new Philox32x4Job
             {
-                Results = Results, Key0 = k0, Key1 = k1, Count = count
+                Results = Results,
+                Key0 = k0,
+                Key1 = k1,
+                Count = count
             }.Schedule().Complete();
             return Results;
         }
@@ -210,7 +218,9 @@ namespace Cet.Rng.Job
             uint k1 = seed ^ 0xBB67AE85u;
             new Philox32x4ParallelJob
             {
-                Results = Results, Key0 = k0, Key1 = k1
+                Results = Results,
+                Key0 = k0,
+                Key1 = k1
             }.Schedule(count >> 2, batchSize).Complete();
             return Results;
         }

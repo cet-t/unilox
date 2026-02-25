@@ -127,7 +127,7 @@ namespace Cet.Rng.Job
             {
                 Philox64x2.Bijection10((ulong)i, 0uL, k0, out ulong o0, out ulong o1);
                 int b = i << 1;
-                ptr[b]     = o0;
+                ptr[b] = o0;
                 ptr[b + 1] = o1;
             }
         }
@@ -146,12 +146,17 @@ namespace Cet.Rng.Job
             ulong* ptr = (ulong*)Results.GetUnsafePtr();
             Philox64x2.Bijection10((ulong)index, 0uL, Key0, out ulong o0, out ulong o1);
             int b = index << 1;
-            ptr[b]     = o0;
+            ptr[b] = o0;
             ptr[b + 1] = o1;
         }
     }
 
-    public struct Philox64x2Seq : IDisposable
+    public interface IParSeq64 : IDisposable
+    {
+        NativeArray<ulong> FillParallel(int count, ulong seed, int batchSize = 256);
+    }
+
+    public struct Philox64x2Seq : ISeq64, IParSeq64
     {
         public NativeArray<ulong> Results;
 
@@ -160,20 +165,23 @@ namespace Cet.Rng.Job
             Results = new(maxCount, allocator);
         }
 
-        public NativeArray<ulong> Fill(int count, uint seed)
+        public NativeArray<ulong> Fill(int count, ulong seed)
         {
             new Philox64x2Job
             {
-                Results = Results, Key0 = seed, Count = count
+                Results = Results,
+                Key0 = seed,
+                Count = count
             }.Schedule().Complete();
             return Results;
         }
 
-        public NativeArray<ulong> FillParallel(int count, uint seed, int batchSize = 256)
+        public NativeArray<ulong> FillParallel(int count, ulong seed, int batchSize = 256)
         {
             new Philox64x2ParallelJob
             {
-                Results = Results, Key0 = seed
+                Results = Results,
+                Key0 = seed
             }.Schedule(count >> 1, batchSize).Complete();
             return Results;
         }

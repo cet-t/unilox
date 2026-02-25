@@ -1,0 +1,22 @@
+# Quality Test Results: URng.Sfmt19937-64
+Date: 2026-02-26 01:57:49
+
+## Chi-Square Goodness-of-Fit Test
+Samples     : 1,000,000
+Bins        : 100
+χ² Statistic: 100.9702
+df          : 99
+Critical(5%): 123.225
+Result      : PASS ✓
+
+## Monte Carlo Pi Estimation
+Samples    : 1,000,000
+Inside     : 785,521
+π Estimate : 3.142084
+True π     : 3.141593
+Abs Error  : 0.000491
+
+## Noise Image
+Size  : 256x256
+File  : URng_Sfmt19937-64_noise.png
+

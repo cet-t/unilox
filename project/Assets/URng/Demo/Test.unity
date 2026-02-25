@@ -265,12 +265,12 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1166595335}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cbcf407154a80d74e874d55431228279, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  philox32:
+  philox32Gpu:
     shader: {fileID: 7200000, guid: 455e248e2012613469ce51781085c96d, type: 3}
 --- !u!114 &1166595342
 MonoBehaviour:
@@ -279,7 +279,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1166595335}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b001353833fd2004b8a61b827f0d4f4f, type: 3}
   m_Name: 
