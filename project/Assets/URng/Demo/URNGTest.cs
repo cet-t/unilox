@@ -16,7 +16,7 @@ namespace Cet.Rng.Tests
     {
         public Philox32Gpu philox32Gpu;
 
-        const int N = 10_000_000;
+        const int N = 160_000_000;
         const int M = 10;
 
         private readonly Dictionary<string, TimeSpan> times = new(32);
@@ -28,8 +28,8 @@ namespace Cet.Rng.Tests
             Debug.Log($"M: {M:#,#}");
 
             // Cet.Rng.Cs (C#)
-            TestCsRng64("URng.C#.SplitMix64", () => new CCs.SplitMix64(0));
-            TestCsRng64("URng.C#.Xoshiro256**", () => new CCs.Xoshiro256pp());
+            // TestCsRng64("URng.C#.SplitMix64", () => new CCs.SplitMix64(0));
+            // TestCsRng64("URng.C#.Xoshiro256**", () => new CCs.Xoshiro256pp());
 
             // Cet.Rng.Job (C#)
             TestJobRng32("URng.Job.SplitMix32", () => new SplitMix32Seq(N));
@@ -38,15 +38,15 @@ namespace Cet.Rng.Tests
             TestJobRng32("URng.Job.Philox32x4 IJob", () => new Philox32x4Seq(N));
             TestParJobRng32("URng.Job.Philox32x4 Parallel", () => new Philox32x4Seq(N));
 
-            TestJobRng64("URng.Job.SplitMix64", () => new SplitMix64Seq(N));
-            TestJobRng64("URng.Job.Sfc64", () => new Sfc64Seq(N));
-            TestJobRng64("URng.Job.Xoshiro256**", () => new Xoshiro256SsSeq(N));
-            TestJobRng64("URng.Job.Xoshiro256++", () => new Xoshiro256PpSeq(N));
-            TestJobRng64("URng.Job.Philox64x2 IJob", () => new Philox64x2Seq(N));
-            TestJobRng64("URng.Job.Philox64x2 Parallel", () => new Philox64x2Seq(N));
+            // TestJobRng64("URng.Job.SplitMix64", () => new SplitMix64Seq(N));
+            // TestJobRng64("URng.Job.Sfc64", () => new Sfc64Seq(N));
+            // TestJobRng64("URng.Job.Xoshiro256**", () => new Xoshiro256SsSeq(N));
+            // TestJobRng64("URng.Job.Xoshiro256++", () => new Xoshiro256PpSeq(N));
+            // TestJobRng64("URng.Job.Philox64x2 IJob", () => new Philox64x2Seq(N));
+            // TestJobRng64("URng.Job.Philox64x2 Parallel", () => new Philox64x2Seq(N));
 
             // Cet.Rng.Gpu (C#)
-            TestGpuRng();
+            // TestGpuRng();
 
             // Cet.Rng (Rust)
             TestNativeRng32("URng.SplitMix32", () => new SplitMix32(0));
@@ -54,19 +54,20 @@ namespace Cet.Rng.Tests
             TestNativeRng32("URng.Pcg32", () => new Pcg32(0));
             TestNativeRng32("URng.Xorshift32", () => new Xorshift32(0));
             TestNativeRng32("URng.Xorshift128", () => new Xorshift128(1, 2, 3, 4));
-            TestNativeRng32("URng.Philox32", () => new Philox32(0, 1));
+            TestNativeRng32("URng.Philox32", () => new Philox32x4(0));
+            TestNativeRng32("URng.Philox32x4x4", () => new Philox32x4x4(0));
             TestNativeRng32("URng.Sfmt19937", () => new Sfmt19937(0));
 
-            TestNativeRng64("URng.SplitMix64", () => new SplitMix64(0));
-            TestNativeRng64("URng.Sfc64", () => new Sfc64(0));
-            TestNativeRng64("URng.Xoshiro256**", () => new Xoshiro256Ss(0));
-            TestNativeRng64("URng.Xoshiro256++", () => new Xoshiro256Pp(0));
-            TestNativeRng64("URng.Mt19937-64", () => new Mt1993764(0));
-            TestNativeRng64("URng.Philox64", () => new Philox64(0));
-            TestNativeRng64("URng.Sfmt19937-64", () => new Sfmt1993764(0));
+            // TestNativeRng64("URng.SplitMix64", () => new SplitMix64(0));
+            // TestNativeRng64("URng.Sfc64", () => new Sfc64(0));
+            // TestNativeRng64("URng.Xoshiro256**", () => new Xoshiro256Ss(0));
+            // TestNativeRng64("URng.Xoshiro256++", () => new Xoshiro256Pp(0));
+            // TestNativeRng64("URng.Mt19937-64", () => new Mt1993764(0));
+            // TestNativeRng64("URng.Philox64", () => new Philox64(0));
+            // TestNativeRng64("URng.Sfmt19937-64", () => new Sfmt1993764(0));
 
             // Standard
-            TestSystemRandom();
+            // TestSystemRandom();
             TestUnityEngineRandom();
             TestUnityMathRandom();
 
@@ -81,11 +82,11 @@ namespace Cet.Rng.Tests
         void TestNativeRng32(string name, Func<IRng32> factory)
         {
             using var rng = factory();
-            var a = new float[N];
+            var a = ReadOnlySpan<float>.Empty;
             sw.Restart();
             for (int i = 0; i < M; i++)
             {
-                a = rng.NextF32s(N).ToArray();
+                a = rng.NextF32s(N);
             }
             sw.Stop();
             times.Add(name, sw.Elapsed);
@@ -94,11 +95,11 @@ namespace Cet.Rng.Tests
         void TestNativeRng64(string name, Func<IRng64> factory)
         {
             using var rng = factory();
-            var a = new double[N];
+            var a = ReadOnlySpan<double>.Empty;
             sw.Restart();
             for (int i = 0; i < M; i++)
             {
-                a = rng.NextF64s(N).ToArray();
+                a = rng.NextF64s(N);
             }
             sw.Stop();
             times.Add(name, sw.Elapsed);

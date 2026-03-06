@@ -74,7 +74,8 @@ namespace Cet.Rng.Tests
             TestNativeRng32("URng.Xorshift32", () => new Xorshift32(42));
             TestNativeRng32("URng.Xorshift128", () => new Xorshift128(1, 2, 3, 4));
             TestNativeRng32("URng.Pcg32", () => new Pcg32(42));
-            TestNativeRng32("URng.Philox32", () => new Cet.Rng.Philox32(42, 1));
+            TestNativeRng32("URng.Philox32x4", () => new Cet.Rng.Philox32x4(42));
+            TestNativeRng32("URng.Philox32x4x4", () => new Cet.Rng.Philox32x4x4(42));
             TestNativeRng32("URng.SplitMix32", () => new Cet.Rng.SplitMix32(42));
 
             // ── Cet.Rng Native (Rust) 64-bit RNGs ──
