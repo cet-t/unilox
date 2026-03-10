@@ -16,7 +16,7 @@ namespace Cet.Rng.Tests
     {
         public Philox32Gpu philox32Gpu;
 
-        const int N = 160_000_000;
+        const int N = 100_000_000;
         const int M = 10;
 
         private readonly Dictionary<string, TimeSpan> times = new(32);
@@ -57,6 +57,7 @@ namespace Cet.Rng.Tests
             TestNativeRng32("URng.Philox32", () => new Philox32x4(0));
             TestNativeRng32("URng.Philox32x4x4", () => new Philox32x4x4(0));
             TestNativeRng32("URng.Sfmt19937", () => new Sfmt19937(0));
+            TestNativeRng32("URng.Squares32x8", () => new Squares32x8(0));
 
             // TestNativeRng64("URng.SplitMix64", () => new SplitMix64(0));
             // TestNativeRng64("URng.Sfc64", () => new Sfc64(0));
@@ -67,7 +68,7 @@ namespace Cet.Rng.Tests
             // TestNativeRng64("URng.Sfmt19937-64", () => new Sfmt1993764(0));
 
             // Standard
-            // TestSystemRandom();
+            TestSystemRandom();
             TestUnityEngineRandom();
             TestUnityMathRandom();
 
