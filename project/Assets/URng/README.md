@@ -78,10 +78,10 @@ Ultimate RNG provides a variety of algorithms, allowing you to choose the best t
 - **Use Case**: When a strong balance of high speed, small state size, and chaotic properties is needed.
 - **Description**: Small Fast Chaotic PRNG implemented in Rust. Excellent for initializing other states or when you need a fast native generator with a smaller memory footprint than Mersenne Twister.
 
-### 3.5. Ultimate Speed: Philox32 (Rust Native)
+### 3.5. Ultimate Speed: Philox32x4x4 / Squares32x8 (Rust Native)
 
 - **Use Case**: When you need the absolute fastest generation speeds possible for extreme batch workloads.
-- **Description**: The counter-based Philox32 PRNG implemented in native Rust. This currently delivers the highest performance of all available generators in the suite.
+- **Description**: Highly optimized implementations of Philox and Squares algorithms in native Rust. These currently deliver the highest performance of all available generators in the suite, utilizing advanced SIMD and unrolling techniques.
 
 > [!NOTE]
 > **Rust Native Seed Initialization**
@@ -190,38 +190,28 @@ public class GpuRngExample : MonoBehaviour
 
 ## 6. Benchmarks
 
-Performance comparison for generating **10,000,000** random numbers.
+Performance comparison for generating random numbers based on latest benchmark results.
 Tested environments may vary, but this illustrates the relative speed of each implementation compared to standard Unity/C# generators.
 
-| Generator                        |   Time (ms) |         Relative Speed |
-| :------------------------------- | ----------: | ---------------------: |
-| **URng.Philox32** (Rust)         | **0.79 ms** | **100.00% (Baseline)** |
-| **URng.Job.Xoshiro256++**        |     1.26 ms |                159.25% |
-| **URng.Job.Xoshiro256\*\***      |     1.36 ms |                171.89% |
-| **URng.Job.Sfc64**               |     1.44 ms |                182.00% |
-| **URng.Job.SplitMix32**          |     1.46 ms |                184.53% |
-| **URng.Job.SplitMix64**          |     1.61 ms |                204.07% |
-| **URng.Job.Philox32x4 Parallel** |     1.76 ms |                222.45% |
-| **URng.Sfc64** (Rust)            |     2.66 ms |                335.96% |
-| **URng.Xoshiro256\*\*** (Rust)   |     2.70 ms |                341.17% |
-| **URng.Philox64** (Rust)         |     3.36 ms |                425.20% |
-| **URng.Xoshiro256++** (Rust)     |     3.41 ms |                430.67% |
-| **URng.Gpu.Philox32**            |     5.24 ms |                662.29% |
-| **URng.Xorshift64** (Rust)       |     6.45 ms |                815.22% |
-| **URng.Sfmt19937** (Rust)        |     6.71 ms |                848.08% |
-| **URng.Xorshift32** (Rust)       |     6.95 ms |                878.41% |
-| **URng.Job.Pcg32**               |     7.93 ms |               1002.54% |
-| **URng.Mt19937** (Rust)          |     8.13 ms |               1027.55% |
-| **URng.Pcg32** (Rust)            |     8.80 ms |               1112.23% |
-| **URng.Sfmt19937-64** (Rust)     |     9.73 ms |               1229.78% |
-| **URng.Job.Philox32x4 IJob**     |    10.18 ms |               1286.65% |
-| **URng.Job.Mt19937**             |    11.28 ms |               1425.68% |
-| **URng.Mt19937-64** (Rust)       |    11.89 ms |               1502.78% |
-| **URng.Xorshift128** (Rust)      |    28.94 ms |               3657.74% |
-| **URng.Job.Philox64x2 IJob**     |    31.56 ms |               3988.88% |
-| `Unity.Mathematics.Random`       |    40.19 ms |               5080.19% |
-| `UnityEngine.Random`             |    71.35 ms |               9018.11% |
-| `System.Random`                  |    88.16 ms |              11142.38% |
+| Generator                        |    Time (ms) |         Relative Speed |
+| :------------------------------- | -----------: | ---------------------: |
+| **URng.Philox32x4x4** (Rust)     | **18.16 ms** | **100.00% (Baseline)** |
+| **URng.Squares32x8** (Rust)      |     18.50 ms |                101.88% |
+| **URng.Philox32** (Rust)         |     21.42 ms |                117.97% |
+| **URng.Job.Philox32x4 Parallel** |     52.19 ms |                287.40% |
+| **URng.Xorshift32** (Rust)       |     70.38 ms |                387.55% |
+| **URng.SplitMix32** (Rust)       |     79.44 ms |                437.44% |
+| **URng.Job.SplitMix32**          |     83.06 ms |                457.35% |
+| **URng.Mt19937** (Rust)          |     87.66 ms |                482.69% |
+| **URng.Sfmt19937** (Rust)        |     88.68 ms |                488.30% |
+| **URng.Pcg32** (Rust)            |    121.46 ms |                668.81% |
+| **URng.Job.Pcg32**               |    155.39 ms |                855.66% |
+| **URng.Job.Philox32x4 IJob**     |    155.98 ms |                858.87% |
+| **URng.Job.Mt19937**             |    201.54 ms |               1109.77% |
+| **URng.Xorshift128** (Rust)      |    300.46 ms |               1654.43% |
+| `UnityEngine.Random`             |    692.93 ms |               3815.53% |
+| `Unity.Mathematics.Random`       |    695.53 ms |               3829.83% |
+| `System.Random`                  |    852.72 ms |               4695.38% |
 
 > [!NOTE]
-> Lower time is better. `URng` implementations utilizing native Rust plugins and the Burst compiler (`URng.Job`) show massive performance gains, up to **~111x faster** than standard `System.Random` and **~90x faster** than `UnityEngine.Random` for massive bulk generation workloads!
+> Lower time is better. `URng` implementations utilizing native Rust plugins and the Burst compiler (`URng.Job`) show massive performance gains, up to **~47x faster** than standard `System.Random` and **~38x faster** than `UnityEngine.Random` for massive bulk generation workloads!

@@ -24,11 +24,11 @@ _Note: Ultimate RNG is strictly specialized for batch generation and is not inte
 
 **Key Features:**
 
-- **Blazing Fast Performance**: Achieve up to 111x faster generation speeds compared to standard Unity or C# generators on bulk workloads.
+- **Blazing Fast Performance**: Achieve up to 40x faster generation speeds compared to standard Unity or C# generators. Native plugins leverage **AVX-512** SIMD instructions and parallel processing for next-generation CPU performance on supported hardware.
 - **Multiple Backends**:
   - **Job System / Burst Compiler**: Native C# high-speed generation (Xoshiro256\*\*, Xoshiro256++, SplitMix).
   - **Compute Shader**: Direct-to-GPU generation (Philox32) for zero CPU overhead.
-  - **Rust Native Plugins**: The absolute gold standard in statistical quality and performance (MT19937, SFMT, SFC64, PCG32, etc.). The internal state of these Rust implementations is securely initialized from the seed using the SplitMix32/64 algorithm.
+  - **Rust Native Plugins**: The absolute gold standard in statistical quality and performance (MT19937, SFMT, SFC64, PCG32, etc.). Features **SIMD Auto-Dispatching** to automatically detect and utilize **AVX-512**, AVX2, or SSE for maximum throughput on any machine. Internal state is securely initialized using SplitMix32/64.
 - **Data-Oriented Design**: Built natively for use with `NativeArray`, `Span<T>`, and the Unity Job System.
 - **Unified Interface**: Clean, consistent API whether generating from Jobs, Compute Shaders, or Native Plugins.
 - **Extensive Benchmarks**: Comes with an integrated Demo scene to benchmark the performance in your own specific environment.
@@ -42,3 +42,5 @@ _Note: Ultimate RNG is strictly specialized for batch generation and is not inte
 - SplitMix32 / SplitMix64
 - Pcg32
 - Xorshift variants
+- Squares32
+- Threefry32

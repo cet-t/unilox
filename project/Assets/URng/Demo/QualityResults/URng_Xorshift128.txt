@@ -1,0 +1,22 @@
+# Quality Test Results: URng.Xorshift128
+Date: 2026-03-13 00:41:20
+
+## Chi-Square Goodness-of-Fit Test
+Samples     : 1,000,000
+Bins        : 100
+χ² Statistic: 98.2972
+df          : 99
+Critical(5%): 123.225
+Result      : PASS ✓
+
+## Monte Carlo Pi Estimation
+Samples    : 1,000,000
+Inside     : 785,602
+π Estimate : 3.142408
+True π     : 3.141593
+Abs Error  : 0.000815
+
+## Noise Image
+Size  : 256x256
+File  : URng_Xorshift128_noise.png
+

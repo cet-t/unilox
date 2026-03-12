@@ -1,0 +1,22 @@
+# Quality Test Results: UnityEngine.Random
+Date: 2026-03-13 00:41:21
+
+## Chi-Square Goodness-of-Fit Test
+Samples     : 1,000,000
+Bins        : 100
+χ² Statistic: 91.2918
+df          : 99
+Critical(5%): 123.225
+Result      : PASS ✓
+
+## Monte Carlo Pi Estimation
+Samples    : 1,000,000
+Inside     : 785,445
+π Estimate : 3.141780
+True π     : 3.141593
+Abs Error  : 0.000187
+
+## Noise Image
+Size  : 256x256
+File  : UnityEngine_Random_noise.png
+
